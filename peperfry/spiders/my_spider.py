@@ -31,7 +31,7 @@ class PepperFrySpider(scrapy.Spider):
             resp.meta['dir_name'] = dir_names[i]
             yield resp
             
-    def parse(self, response):
+    def parse(self, response,**meta):
         product_urls=response.css('div[class=card-img-wrp\ center-xs\ card-srch-img-wrp] a::attr(href)').getall()
         counter = 0
         for url in product_urls[::2]:
@@ -45,11 +45,12 @@ class PepperFrySpider(scrapy.Spider):
                 counter +=1
             yield resp
             
-    def parse_item(self,response):
+    def parse_item(self,response,**meta):
+        item_title=response.css('h1[class=v-pro-ttl\ pf-medium-bold-text]::text').get()
         image_url=response.css('ul[class=vipImage__thumb-slider\ horizontal]')
         image_url_list=image_url.css('li[class=vipImage__thumb-each\ noClickSlide] a::attr(data-img)').getall() 
         CATEGORY_NAME = response.meta['dir_name']
-        ITEM_DIR_URL = os.path.join(self.BASE_DIR,os.path.join(CATEGORY_NAME))  
+        ITEM_DIR_URL = os.path.join(self.BASE_DIR,os.path.join(CATEGORY_NAME,item_title))  
         if not os.path.exists(ITEM_DIR_URL):
             os.makedirs(ITEM_DIR_URL)
             
